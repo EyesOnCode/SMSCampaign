@@ -19,8 +19,12 @@ class Campaign(Base):
                 f"Text='{self.Text}')>")
     
     def AddCustAll(self, session):
-        # Pobierz wszystkich klientów, którzy pasują do płci kampanii
-        customers = session.query(Customer).filter_by(Gender=self.ForGender).all()
+        # If the campaign targets "All", don't filter by Gender, otherwise apply the filter.
+        if self.ForGender == 'All':
+            customers = session.query(Customer).all()
+        else:
+            customers = session.query(Customer).filter_by(Gender=self.ForGender).all()
+
         
         # Dla każdego klienta dodaj rekord SMS do sesji
         for customer in customers:
