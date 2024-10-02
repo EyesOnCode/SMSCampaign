@@ -1,17 +1,14 @@
+import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base, Customer, Campaign, SMS  # Import models from models.py
+from smssender import SmsSender
 
-# Replace with your actual database credentials
-DATABASE_URI = 'mysql+pymysql://smolny1:EyesOn2ndCode!@localhost/customer_relations'
-
-# Create a SQLAlchemy engine
-engine = create_engine(DATABASE_URI)
-
-# Create a session
-Session = sessionmaker(bind=engine)
-session = Session()
-
+def load_config(file_path):
+    """Load configuration from a JSON file."""
+    with open(file_path, 'r') as config_file:
+        config = json.load(config_file)
+    return config
 # def add_customers():
 #     # Create new customer instances
 #     customer1 = Customer(Name='Anna Nowak', Gender='Female', Title='Pani', Wolacz='Anno', Phone='+48 506 976 368')
@@ -50,7 +47,37 @@ session = Session()
 #     session.close()
 
 # Załóżmy, że mamy kampanię z określonym idcampaign
-campaign = session.query(Campaign).filter_by(idcampaign=1).first()
+# campaign = session.query(Campaign).filter_by(idcampaign=1).first()
 
 # Uruchamiamy funkcję, która doda SMSy dla wszystkich pasujących klientów
-campaign.AddCustAll(session)
+# campaign.AddCustAll(session)
+
+if __name__ == "__main__":
+
+    config = load_config('config.json')
+
+    # Initialize the SMS sender with values from the config
+    api_secret = config['api_secret']
+    device_guid = config['device_guid']
+    base_url = config['base_url']
+
+    # Database setup
+    DATABASE_URI = (f"mysql+pymysql://{config['db_user']}:{config['db_password']}"
+    f"@{config['db_host']}/{config['db_name']}")
+    # Create a SQLAlchemy engine
+    engine = create_engine(DATABASE_URI)
+
+    # Create a session
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    
+    sms_sender = SmsSender(config['api_secret'], config['device_guid'], config['base_url'], session)
+
+    # Send SMS for a specific campaign (for example, campaign ID 1)
+    campaign_id = 1
+
+    # Normal mode (sending actual SMS)
+    # sms_sender.send_campaign_sms(campaign_id)
+
+    # Dummy mode (only print SMS details without sending)
+    sms_sender.send_campaign_sms(campaign_id, dummy=True)

@@ -1,0 +1,9 @@
+{
+    "api_secret": "11110db2bdd111111ded1a111b11fd0ce1111b1d",
+    "device_guid": "00000000-0000-0000-5d96-b6e1b6249919",
+    "base_url": "https://www.cloud.smschef.com",
+    "db_user": "exampleUser",
+    "db_password": "PasswordExam!",
+    "db_host": "localhost",
+    "db_name": "customer_relations"
+}
