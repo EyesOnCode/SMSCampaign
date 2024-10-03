@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.orm import relationship
 
 Base = declarative_base()
@@ -13,11 +13,12 @@ class Campaign(Base):
     Name = Column(String(45), nullable=False)
     ForGender = Column(String(45), nullable=False)
     Text = Column(String(45), nullable=False)
+    DaysBetweenSms = Column(Integer, nullable=False, default=0)  # New column
 
     def __repr__(self):
         return (f"<Campaign(idcampaign={self.idcampaign}, "
                 f"Name='{self.Name}', ForGender='{self.ForGender}', "
-                f"Text='{self.Text}')>")
+                f"Text='{self.Text}', DaysBetweenSms={self.DaysBetweenSms})>")
     
     def AddCustAll(self, session):
         # If the campaign targets "All", don't filter by Gender, otherwise apply the filter.
@@ -26,22 +27,38 @@ class Campaign(Base):
         else:
             customers = session.query(Customer).filter_by(Gender=self.ForGender).all()
 
-        
-        # Dla każdego klienta dodaj rekord SMS do sesji
+        # Calculate the cutoff date based on DaysBetweenSms
+        if self.DaysBetweenSms > 0:
+            cutoff_date = datetime.now() - timedelta(days=self.DaysBetweenSms)
+        else:
+            cutoff_date = None
+
+        # For each customer, add an SMS record to the session if they are eligible
         for customer in customers:
-            sms_text = self.Text.replace("{Name}", customer.Wolacz)  # Personalizowanie treści SMS
+            # Check if customer received an SMS in the last 'DaysBetweenSms' days
+            if cutoff_date:
+                # Query to find the latest SMS sent to the customer
+                last_sms = session.query(SMS).filter_by(idcustomer=customer.idCustomers).order_by(SMS.senddate.desc()).first()
+
+                # If the customer has received an SMS after the cutoff date, skip adding a new SMS
+                if last_sms and last_sms.senddate and last_sms.senddate > cutoff_date:
+                    continue  # Skip this customer if they recently received an SMS
+
+            # Personalize SMS content with the customer's name
+            sms_text = self.Text.replace("{Name}", customer.Wolacz)  # Personalizing SMS content
             sms = SMS(
                 idcampaign=self.idcampaign,
                 idcustomer=customer.idCustomers,
-                senddate=None,  # Możesz ustawić datę wysyłki, jeśli jest już znana
-                status='Pending',  # Domyślny status wiadomości
+                senddate=None,  # You can set a specific send date if needed
+                status='Ready',  # Default status of the SMS
                 text=sms_text,
                 createdate=datetime.now()
             )
             session.add(sms)
-        
-        # Zapisz wszystkie nowe rekordy SMS
+
+        # Save all new SMS records
         session.commit()
+
 
 class Customer(Base):
     __tablename__ = 'customers'  # Name of the table in the database

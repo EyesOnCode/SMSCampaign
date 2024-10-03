@@ -70,11 +70,17 @@ if __name__ == "__main__":
     # Create a session
     Session = sessionmaker(bind=engine)
     session = Session()
+    # Załóżmy, że mamy kampanię z określonym idcampaign
+    campaign_id = 3
+    campaign = session.query(Campaign).filter_by(idcampaign=campaign_id).first()
+
+    # Uruchamiamy funkcję, która doda SMSy dla wszystkich pasujących klientów
+    campaign.AddCustAll(session)
     
     sms_sender = SmsSender(config['api_secret'], config['device_guid'], config['base_url'], session)
 
     # Send SMS for a specific campaign (for example, campaign ID 1)
-    campaign_id = 1
+
 
     # Normal mode (sending actual SMS)
     # sms_sender.send_campaign_sms(campaign_id)
