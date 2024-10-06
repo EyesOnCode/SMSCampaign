@@ -39,7 +39,7 @@ class SmsSender:
                 result = response.json()
 
                 # Handle the response and update the status
-                if result.get("status") == "success":
+                if result.get("message") == "Message has been queued for sending!":
                     sms_record.status = "sent"
                     sms_record.senddate = datetime.now() 
                     print(f"SMS sent to {sms_record.customer.Name} successfully!")
