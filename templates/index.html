@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaigns</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Campaign List</h1>
+
+    <!-- Table to display all campaigns -->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>For Gender</th>
+                <th>Text</th>
+                <th>Days Between SMS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for campaign in campaigns %}
+                <tr>
+                    <td>{{ campaign.idcampaign }}</td>
+                    <td>{{ campaign.Name }}</td>
+                    <td>{{ campaign.ForGender }}</td>
+                    <td>{{ campaign.Text }}</td>
+                    <td>{{ campaign.DaysBetweenSms }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
