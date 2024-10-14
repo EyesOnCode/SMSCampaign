@@ -9,7 +9,15 @@
 <body>
     <h1>Campaign List</h1>
 
+    <!-- Add Campaign Button -->
+    <div>
+        <a href="{{ url_for('add_campaign_page') }}">
+            <button>Add New Campaign</button>
+        </a>
+    </div>
+
     <!-- Table to display all campaigns -->
+    <h2>Existing Campaigns</h2>
     <table border="1">
         <thead>
             <tr>
@@ -18,6 +26,7 @@
                 <th>For Gender</th>
                 <th>Text</th>
                 <th>Days Between SMS</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
@@ -28,6 +37,16 @@
                     <td>{{ campaign.ForGender }}</td>
                     <td>{{ campaign.Text }}</td>
                     <td>{{ campaign.DaysBetweenSms }}</td>
+                    <td>{{ campaign.Status }}</td>
+                    <td>
+                        <form action="{{ url_for('delete_campaign', campaign_id=campaign.idcampaign) }}" method="POST">
+                            {% if campaign.Status != 'completed' %}
+                                <button type="submit">Delete</button>
+                            {% else %}
+                                <button type="button" disabled>Delete</button>
+                            {% endif %}
+                        </form>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>

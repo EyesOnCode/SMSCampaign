@@ -12,13 +12,14 @@ class Campaign(Base):
     idcampaign = Column(Integer, primary_key=True, autoincrement=True)
     Name = Column(String(45), nullable=False)
     ForGender = Column(String(45), nullable=False)
-    Text = Column(String(45), nullable=False)
-    DaysBetweenSms = Column(Integer, nullable=False, default=0)  # New column
+    Text = Column(String(255), nullable=False)
+    DaysBetweenSms = Column(Integer, nullable=False, default=0)
+    Status = Column(String(45), nullable=False, default='init')
 
     def __repr__(self):
         return (f"<Campaign(idcampaign={self.idcampaign}, "
                 f"Name='{self.Name}', ForGender='{self.ForGender}', "
-                f"Text='{self.Text}', DaysBetweenSms={self.DaysBetweenSms})>")
+                f"Text='{self.Text}', DaysBetweenSms={self.DaysBetweenSms}, Status={self.Status})>")
     
     def AddCustAll(self, session):
         # If the campaign targets "All", don't filter by Gender, otherwise apply the filter.

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Campaign</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Add New Campaign</h1>
+
+    <!-- Form to add a new campaign -->
+    <form action="{{ url_for('add_campaign') }}" method="POST">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="for_gender">For Gender:</label><br>
+        <select id="for_gender" name="for_gender" required>
+            <option value="All">All</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select><br><br>
+
+        <label for="text">Text:</label><br>
+        <textarea id="text" name="text" rows="4" cols="50" required></textarea><br><br>
+        
+
+
+        <label for="days_between_sms">Days Between SMS:</label><br>
+        <input type="number" id="days_between_sms" name="days_between_sms" required><br><br>
+
+        <button type="submit">Add Campaign</button>
+    </form>
+
+    <!-- Back to Campaign List Button -->
+    <div>
+        <a href="{{ url_for('index') }}">
+            <button>Back to Campaign List</button>
+        </a>
+    </div>
+</body>
+</html>
