@@ -7,30 +7,29 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Add New Campaign</h1>
+    <h1>{{ 'Edit Campaign' if edit else 'Add New Campaign' }}</h1>
 
-    <!-- Form to add a new campaign -->
-    <form action="{{ url_for('add_campaign') }}" method="POST">
-        <label for="name">Name:</label><br>
-        <input type="text" id="name" name="name" required><br><br>
+<!-- Form to add or edit a campaign -->
+<form action="{{ url_for('edit_campaign', id=campaign.idcampaign) if edit else url_for('add_campaign') }}" method="POST">
+    <label for="name">Name:</label><br>
+    <input type="text" id="name" name="name" value="{{ campaign.Name if edit else '' }}" required><br><br>
 
-        <label for="for_gender">For Gender:</label><br>
-        <select id="for_gender" name="for_gender" required>
-            <option value="All">All</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-        </select><br><br>
+    <label for="for_gender">For Gender:</label><br>
+    <select id="for_gender" name="for_gender" required>
+        <option value="All" {% if edit and campaign.ForGender == 'All' %}selected{% endif %}>All</option>
+        <option value="Male" {% if edit and campaign.ForGender == 'Male' %}selected{% endif %}>Male</option>
+        <option value="Female" {% if edit and campaign.ForGender == 'Female' %}selected{% endif %}>Female</option>
+    </select><br><br>
 
-        <label for="text">Text:</label><br>
-        <textarea id="text" name="text" rows="4" cols="50" required></textarea><br><br>
-        
+    <label for="text">Text:</label><br>
+    <textarea id="text" name="text" rows="4" cols="50" required>{{ campaign.Text if edit else '' }}</textarea><br><br>
 
+    <label for="days_between_sms">Days Between SMS:</label><br>
+    <input type="number" id="days_between_sms" name="days_between_sms" 
+           value="{{ campaign.DaysBetweenSms if edit else '' }}" required><br><br>
 
-        <label for="days_between_sms">Days Between SMS:</label><br>
-        <input type="number" id="days_between_sms" name="days_between_sms" required><br><br>
-
-        <button type="submit">Add Campaign</button>
-    </form>
+    <button type="submit">{{ 'Update Campaign' if edit else 'Add Campaign' }}</button>
+</form>
 
     <!-- Back to Campaign List Button -->
     <div>

@@ -38,6 +38,16 @@
                     <td>{{ campaign.Text }}</td>
                     <td>{{ campaign.DaysBetweenSms }}</td>
                     <td>{{ campaign.Status }}</td>
+                    <td><a href="{{ url_for('edit_campaign', id=campaign.idcampaign) }}">Edit</a></td>
+                    <td>
+                        {% if campaign.Status != 'Completed' %}
+                            <form action="{{ url_for('prepare_campaign', id=campaign.idcampaign) }}" method="POST" style="display:inline;">
+                                <button type="submit">Prepare</button>
+                            </form>
+                        {% else %}
+                            <button disabled>Prepare</button>
+                        {% endif %}
+                    </td>
                     <td>
                         <form action="{{ url_for('delete_campaign', campaign_id=campaign.idcampaign) }}" method="POST">
                             {% if campaign.Status != 'completed' %}

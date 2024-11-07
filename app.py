@@ -66,6 +66,32 @@ def add_campaign():
     # Redirect back to the campaign list after adding the new campaign
     return redirect(url_for('index'))
 
+@app.route('/editCampaign/<int:id>', methods=['GET', 'POST'])
+def edit_campaign(id):
+    # Retrieve the campaign by ID
+    campaign = session.query(Campaign).get(id)
+
+    # Check if the campaign exists
+    if not campaign:
+        return "Campaign not found", 404
+
+    if request.method == 'POST':
+        # Get form data and update the campaign
+        campaign.Name = request.form['name']
+        campaign.ForGender = request.form['for_gender']
+        campaign.Text = request.form['text']
+        campaign.DaysBetweenSms = int(request.form['days_between_sms'])
+        
+        # Commit the updated campaign to the database
+        session.commit()
+
+        # Redirect back to the campaign list after updating
+        return redirect(url_for('index'))
+
+    # Render the form with existing campaign data for editing
+    return render_template('addCampaign.html', campaign=campaign, edit=True)
+
+
 @app.route('/delete_campaign/<int:campaign_id>', methods=['POST'])
 def delete_campaign(campaign_id):
     # Find the campaign by its ID
@@ -83,6 +109,33 @@ def delete_campaign(campaign_id):
     session.commit()
 
     flash(f'Campaign {campaign.Name} and its associated SMS records were deleted successfully.', 'success')
+
+    # Redirect back to the campaign list
+    return redirect(url_for('index'))
+@app.route('/edit_campaign/<int:id>', methods=['GET', 'POST'])
+def edit_campaign_page(id):
+    campaign = session.query(Campaign).get(id)
+    if request.method == 'POST':
+        campaign.Name = request.form['name']
+        campaign.ForGender = request.form['for_gender']
+        campaign.Text = request.form['text']
+        campaign.DaysBetweenSms = request.form['days_between_sms']
+        campaign.Status = request.form['status']
+        session.commit()
+        return redirect(url_for('index'))
+    return render_template('addCampaign.html', campaign=campaign, edit=True)
+
+@app.route('/prepareCampaign/<int:id>', methods=['POST'])
+def prepare_campaign(id):
+    # Retrieve the campaign by ID
+    campaign = session.query(Campaign).get(id)
+
+    # Check if the campaign exists
+    if not campaign:
+        return "Campaign not found", 404
+
+    # Generate SMS records using the AddCustAll method
+    campaign.AddCustAll(session)
 
     # Redirect back to the campaign list
     return redirect(url_for('index'))

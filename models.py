@@ -23,6 +23,7 @@ class Campaign(Base):
     
     def AddCustAll(self, session):
         # If the campaign targets "All", don't filter by Gender, otherwise apply the filter.
+        print("Start AddCust All")
         if self.ForGender == 'All':
             customers = session.query(Customer).all()
         else:
@@ -42,7 +43,7 @@ class Campaign(Base):
                 last_sms = session.query(SMS).filter_by(idcustomer=customer.idCustomers).order_by(SMS.senddate.desc()).first()
 
                 # If the customer has received an SMS after the cutoff date, skip adding a new SMS
-                if last_sms and last_sms.senddate and last_sms.senddate < cutoff_date:
+                if last_sms and last_sms.senddate and last_sms.senddate > cutoff_date:
                     continue  # Skip this customer if they recently received an SMS
 
             # Personalize SMS content with the customer's name
@@ -56,7 +57,7 @@ class Campaign(Base):
                 createdate=datetime.now()
             )
             session.add(sms)
-
+        self.Status = 'ready'
         # Save all new SMS records
         session.commit()
 

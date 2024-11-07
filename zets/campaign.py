@@ -17,7 +17,7 @@ class Campaign(Base):
     def __repr__(self):
         return (f"<Campaign(idcampaign={self.idcampaign}, "
                 f"Name='{self.Name}', ForGender='{self.ForGender}', "
-                f"Text='{self.Text}')>,DaysBetweenSms='{self.DaysBetweenSms}')"
+                f"Text='{self.Text}')>,DaysBetweenSms='{self.DaysBetweenSms}'")
     
     def AddCustAll(self, session):
         # If the campaign targets "All", don't filter by Gender, otherwise apply the filter.
