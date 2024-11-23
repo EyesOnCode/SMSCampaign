@@ -27,28 +27,47 @@
                 <th>Text</th>
                 <th>Days Between SMS</th>
                 <th>Status</th>
+                <th>SMS Count</th> <!-- New column -->
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
             {% for campaign in campaigns %}
                 <tr>
                     <td>{{ campaign.idcampaign }}</td>
-                    <td>{{ campaign.Name }}</td>
+                    <td><a href="{{ url_for('campaign_details', id=campaign.idcampaign) }}">{{ campaign.Name }}</a></td>
                     <td>{{ campaign.ForGender }}</td>
                     <td>{{ campaign.Text }}</td>
                     <td>{{ campaign.DaysBetweenSms }}</td>
                     <td>{{ campaign.Status }}</td>
-                    <td><a href="{{ url_for('edit_campaign', id=campaign.idcampaign) }}">Edit</a></td>
                     <td>
-                        {% if campaign.Status != 'Completed' %}
+                        {% if sms_counts[campaign.idcampaign] is not none %}
+                            {{ sms_counts[campaign.idcampaign] }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if campaign.Status == 'ready' %}
+                            <form action="{{ url_for('clear_campaign', id=campaign.idcampaign) }}" method="POST" style="display:inline;">
+                                <button type="submit">Clear</button>
+                            </form>
+                        {% else %}
+                            <a href="{{ url_for('edit_campaign', id=campaign.idcampaign) }}">Edit</a>
+                        {% endif %}
+
+                        {% if campaign.Status == 'ready' %}
+                            <form action="{{ url_for('send_sms', id=campaign.idcampaign) }}" method="POST" style="display:inline;">
+                                <button type="submit">Send SMS</button>
+                            </form>
+                        {% elif campaign.Status != 'Completed' %}
                             <form action="{{ url_for('prepare_campaign', id=campaign.idcampaign) }}" method="POST" style="display:inline;">
                                 <button type="submit">Prepare</button>
                             </form>
                         {% else %}
                             <button disabled>Prepare</button>
                         {% endif %}
-                    </td>
-                    <td>
+
                         <form action="{{ url_for('delete_campaign', campaign_id=campaign.idcampaign) }}" method="POST">
                             {% if campaign.Status != 'completed' %}
                                 <button type="submit">Delete</button>

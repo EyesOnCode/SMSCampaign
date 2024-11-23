@@ -35,9 +35,16 @@ class Campaign(Base):
         else:
             cutoff_date = None
 
+
+
         # For each customer, add an SMS record to the session if they are eligible
         for customer in customers:
             # Check if customer received an SMS in the last 'DaysBetweenSms' days
+            # Skip customers with the name "skip"
+            if customer.Name.lower() == "skip":
+                print(f"Skipping customer {customer.Name} (id: {customer.idCustomers})")
+                continue
+            
             if cutoff_date:
                 # Query to find the latest SMS sent to the customer
                 last_sms = session.query(SMS).filter_by(idcustomer=customer.idCustomers).order_by(SMS.senddate.desc()).first()
@@ -46,8 +53,8 @@ class Campaign(Base):
                 if last_sms and last_sms.senddate and last_sms.senddate > cutoff_date:
                     continue  # Skip this customer if they recently received an SMS
 
-            # Personalize SMS content with the customer's name
-            sms_text = self.Text.replace("{Name}", customer.Wolacz)  # Personalizing SMS content
+            # Use the smsText method to generate the text
+            sms_text = self.smsText(customer)
             sms = SMS(
                 idcampaign=self.idcampaign,
                 idcustomer=customer.idCustomers,
@@ -60,6 +67,15 @@ class Campaign(Base):
         self.Status = 'ready'
         # Save all new SMS records
         session.commit()
+
+    def smsText(self, customer):
+        """
+        Generate personalized SMS text for a given customer.
+        :param customer: Customer object
+        :return: Personalized SMS text
+        """
+        print("Start sms text")
+        return self.Text.replace("{Name}", customer.Wolacz)
 
 
 class Customer(Base):

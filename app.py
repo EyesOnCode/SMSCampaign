@@ -36,9 +36,17 @@ session = Session()
 def index():
     # Query to get all campaigns from the database
     all_campaigns = session.query(Campaign).all()
+    # Prepare a dictionary to store SMS counts for campaigns in "Ready" status
+    sms_counts = {}
+    for campaign in all_campaigns:
+        if campaign.Status == 'ready':
+            sms_count = session.query(SMS).filter_by(idcampaign=campaign.idcampaign).count()
+            sms_counts[campaign.idcampaign] = sms_count
+        else:
+            sms_counts[campaign.idcampaign] = None  # No count for campaigns not in "Ready" status
 
     # Render a template to display the campaigns
-    return render_template('index.html', campaigns=all_campaigns)
+    return render_template('index.html', campaigns=all_campaigns, sms_counts=sms_counts)
 
 @app.route('/addCampaign', methods=['GET'])
 def add_campaign_page():
@@ -125,6 +133,19 @@ def edit_campaign_page(id):
         return redirect(url_for('index'))
     return render_template('addCampaign.html', campaign=campaign, edit=True)
 
+@app.route('/campaign/<int:id>', methods=['GET'])
+def campaign_details(id):
+    # Query for the specific campaign and its related SMS records
+    campaign = session.query(Campaign).filter_by(idcampaign=id).first()
+    sms_records = session.query(SMS).filter_by(idcampaign=id).all()
+
+    if not campaign:
+        return "Campaign not found", 404
+
+    # Render a template to display the campaign details and SMS records
+    return render_template('campaign_details.html', campaign=campaign, sms_records=sms_records)
+
+
 @app.route('/prepareCampaign/<int:id>', methods=['POST'])
 def prepare_campaign(id):
     # Retrieve the campaign by ID
@@ -139,6 +160,56 @@ def prepare_campaign(id):
 
     # Redirect back to the campaign list
     return redirect(url_for('index'))
+
+@app.route('/clear_campaign/<int:id>', methods=['POST'])
+def clear_campaign(id):
+    # Query the campaign
+    campaign = session.query(Campaign).filter_by(idcampaign=id).first()
+
+    if not campaign:
+        return "Campaign not found", 404
+
+    # Check if the campaign status is "Ready"
+    if campaign.Status == 'ready':
+        # Delete all SMS records associated with this campaign
+        session.query(SMS).filter_by(idcampaign=id).delete()
+
+        # Update the campaign status to "init"
+        campaign.Status = 'init'
+        session.commit()
+
+    # Redirect back to the index page
+    return redirect(url_for('index'))
+
+@app.route('/send_sms/<int:id>', methods=['POST'])
+def send_sms(id):
+    # Query the campaign
+    campaign = session.query(Campaign).filter_by(idcampaign=id).first()
+
+    if not campaign:
+        return "Campaign not found", 404
+
+    # Check if the campaign status is "Ready"
+    if campaign.Status == 'Ready':
+        # Initialize the SMS sender
+        sms_sender = SmsSender(
+            config['api_secret'], 
+            config['device_guid'], 
+            config['base_url'], 
+            session
+        )
+
+        # Send SMS for the campaign
+        sms_sender.send_campaign_sms(id)
+
+        # Optionally, update the campaign status to indicate SMSs have been sent
+        campaign.Status = 'Completed'
+        session.commit()
+
+    # Redirect back to the index page
+    return redirect(url_for('index'))
+
+
 
 
 if __name__ == '__main__':
